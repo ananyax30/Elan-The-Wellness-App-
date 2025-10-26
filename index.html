@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Élan - Build better habits, track your wellness journey, and achieve your goals with AI-powered insights.">
+    <meta name="author" content="Élan Team">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Élan: The Wellness App - Go For Better Habits</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase CDN Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <!-- Welcome Screen (First-time users) -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+            <!-- Inline SVG Logo - Abstract Wellness Symbol -->
+            <svg class="welcome-logo" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Élan Logo">
+              <!-- Modern abstract wellness symbol - Flowing bars representing habits/progress -->
+              <rect x="50" y="60" width="100" height="18" rx="9" fill="#4CAF50"/>
+              <rect x="50" y="91" width="100" height="18" rx="9" fill="#00C853"/>
+              <rect x="50" y="122" width="100" height="18" rx="9" fill="#66BB6A"/>
+              <!-- Accent mark above representing growth/aspiration -->
+              <circle cx="100" cy="35" r="8" fill="#4CAF50"/>
+            </svg>
+            <h1 class="welcome-title">Élan: The Wellness App</h1>
+            <p class="welcome-subtitle">Go For Better Habits with Elan</p>
+            <div class="login-options">
+                <button class="login-btn" id="mobileLoginBtn">
+                    <span class="login-icon">📱</span>
+                    <span>Continue with Mobile Number</span>
+                </button>
+                <button class="login-btn" id="emailLoginBtn">
+                    <span class="login-icon">✉️</span>
+                    <span>Continue with Email</span>
+                </button>
+                <button class="login-btn" id="googleLoginBtn">
+                    <span class="login-icon">🔐</span>
+                    <span>Continue with Google</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <div class="header-content">
+            <div class="brand">
+                <!-- Inline SVG Logo - Abstract Wellness Symbol -->
+                <svg class="logo" width="50" height="50" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Élan">
+                  <!-- Modern abstract wellness symbol -->
+                  <rect x="50" y="60" width="100" height="18" rx="9" fill="#4CAF50"/>
+                  <rect x="50" y="91" width="100" height="18" rx="9" fill="#00C853"/>
+                  <rect x="50" y="122" width="100" height="18" rx="9" fill="#66BB6A"/>
+                  <circle cx="100" cy="35" r="8" fill="#4CAF50"/>
+                </svg>
+                <h1 class="brand-name">Élan</h1>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button class="icon-btn" id="notificationsBtn" aria-label="Notifications">
+                    <span>🔔</span>
+                    <span class="badge" id="notifBadge">3</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <button class="nav-item active" data-view="dashboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="habits">
+            <span class="nav-icon">✓</span>
+            <span class="nav-label">Habits</span>
+        </button>
+        <button class="nav-item" data-view="calendar">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Calendar</span>
+        </button>
+        <button class="nav-item" data-view="analytics">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">Analytics</span>
+        </button>
+        <button class="nav-item" data-view="social">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">Social</span>
+        </button>
+        <button class="nav-item" data-view="settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <!-- Dashboard View -->
+        <section class="view active" id="dashboard-view">
+            <div class="view-header">
+                <h2>Dashboard</h2>
+                <p class="subtitle" id="currentDate"></p>
+            </div>
+
+            <!-- Daily Quote -->
+            <div class="quote-card">
+                <div class="quote-header">
+                    <span class="quote-icon">💭</span>
+                    <button class="refresh-quote-btn" id="refreshQuoteBtn" title="Get new quote">🔄</button>
+                </div>
+                <p class="quote-text" id="quoteText">Loading inspiration...</p>
+                <p class="quote-author" id="quoteAuthor"></p>
+            </div>
+
+            <!-- Mood Selector -->
+            <div class="card">
+                <h3 class="card-title">How are you today?</h3>
+                <div class="mood-selector" id="moodSelector">
+                    <!-- Mood buttons will be generated -->
+                </div>
+            </div>
+
+            <!-- Mood Analysis Chart -->
+            <div class="card">
+                <div class="card-header-row">
+                    <div>
+                        <h3 class="card-title">Mood Analysis</h3>
+                        <p class="subtitle" style="margin-top: 4px;">This week</p>
+                    </div>
+                    <div class="week-navigation">
+                        <button class="icon-btn" id="prevWeek">◀</button>
+                        <button class="icon-btn" id="nextWeek">▶</button>
+                    </div>
+                </div>
+                <div class="mood-chart-container">
+                    <canvas id="moodAnalysisChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Discover Insights -->
+            <div class="card">
+                <h3 class="card-title">Discover insights</h3>
+                <div class="insights-grid" id="insightsGrid">
+                    <!-- Insights will be generated -->
+                </div>
+            </div>
+
+            <!-- Today's Progress -->
+            <div class="card">
+                <div class="card-header-row">
+                    <h3 class="card-title">Today's Habits</h3>
+                    <div class="progress-summary">
+                        <span id="completedCount">0</span>/<span id="totalCount">0</span> completed
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="todayProgress">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="habits-list" id="todayHabits">
+                    <!-- Today's habits will be generated -->
+                </div>
+            </div>
+
+            <!-- Active Streaks -->
+            <div class="card">
+                <h3 class="card-title">🔥 Active Streaks</h3>
+                <div class="streaks-grid" id="activeStreaks">
+                    <!-- Streaks will be generated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Habits View -->
+        <section class="view" id="habits-view">
+            <div class="view-header">
+                <h2>My Habits</h2>
+                <button class="btn btn--primary" id="addHabitBtn">
+                    <span>+ Add Habit</span>
+                </button>
+            </div>
+
+            <!-- Habits by Category -->
+            <div id="habitsByCategory">
+                <!-- Categories and habits will be generated -->
+            </div>
+        </section>
+
+        <!-- Calendar View -->
+        <section class="view" id="calendar-view">
+            <div class="view-header">
+                <h2>Calendar</h2>
+                <div class="calendar-controls">
+                    <button class="icon-btn" id="prevMonth">◀</button>
+                    <h3 id="calendarMonth"></h3>
+                    <button class="icon-btn" id="nextMonth">▶</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated -->
+                </div>
+            </div>
+
+            <div class="card" id="dayDetails" style="display: none;">
+                <h3 class="card-title">Day Details</h3>
+                <div id="dayDetailsContent"></div>
+            </div>
+        </section>
+
+        <!-- Analytics View -->
+        <section class="view" id="analytics-view">
+            <div class="view-header">
+                <h2>Analytics</h2>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">🔥</span>
+                    <div class="stat-content">
+                        <h4 class="stat-value" id="longestStreak">0</h4>
+                        <p class="stat-label">Longest Streak</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">✅</span>
+                    <div class="stat-content">
+                        <h4 class="stat-value" id="totalCompleted">0</h4>
+                        <p class="stat-label">Total Completed</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📊</span>
+                    <div class="stat-content">
+                        <h4 class="stat-value" id="avgCompletion">0%</h4>
+                        <p class="stat-label">Avg Completion</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">😊</span>
+                    <div class="stat-content">
+                        <h4 class="stat-value" id="avgMood">-</h4>
+                        <p class="stat-label">Avg Mood</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="card">
+                <h3 class="card-title">Weekly Completion Rate</h3>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Habit Performance</h3>
+                <div class="chart-container">
+                    <canvas id="habitPerformanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Mood Trends</h3>
+                <div class="chart-container">
+                    <canvas id="moodChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social View -->
+        <section class="view" id="social-view">
+            <div class="view-header">
+                <h2>Social</h2>
+                <button class="btn btn--primary" id="addFriendBtn">
+                    <span>+ Add Friend</span>
+                </button>
+            </div>
+
+            <!-- Share Progress -->
+            <div class="card">
+                <h3 class="card-title">Share Your Progress</h3>
+                <div class="share-buttons">
+                    <button class="share-btn" data-platform="twitter" target="_blank">
+                        <span>🐦</span>
+                        <span>Twitter</span>
+                    </button>
+                    <button class="share-btn" data-platform="facebook" target="_blank">
+                        <span>📘</span>
+                        <span>Facebook</span>
+                    </button>
+                    <button class="share-btn" data-platform="linkedin" target="_blank">
+                        <span>💼</span>
+                        <span>LinkedIn</span>
+                    </button>
+                    <button class="share-btn" data-platform="copy">
+                        <span>🔗</span>
+                        <span>Copy Link</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="card">
+                <h3 class="card-title">🏆 Leaderboard</h3>
+                <div class="leaderboard" id="leaderboard">
+                    <!-- Leaderboard entries will be generated -->
+                </div>
+            </div>
+
+            <!-- Friends List -->
+            <div class="card">
+                <h3 class="card-title">Friends</h3>
+                <div class="friends-list" id="friendsList">
+                    <!-- Friends will be generated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings View -->
+        <section class="view" id="settings-view">
+            <div class="view-header">
+                <h2>Settings</h2>
+            </div>
+
+            <!-- AI Suggestions -->
+            <div class="card">
+                <h3 class="card-title">🤖 AI Recommendations</h3>
+                <p class="text-secondary">Based on your habits and progress</p>
+                <div class="suggestions-list" id="aiSuggestions">
+                    <!-- AI suggestions will be generated -->
+                </div>
+            </div>
+
+            <!-- Reminders -->
+            <div class="card">
+                <h3 class="card-title">⏰ Reminders</h3>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableReminders" checked>
+                        <span>Enable daily reminders</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reminder Time</label>
+                    <input type="time" class="form-control" id="reminderTime" value="09:00">
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="card">
+                <h3 class="card-title">🏅 Achievements</h3>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievements will be generated -->
+                </div>
+            </div>
+
+            <!-- Account -->
+            <div class="card">
+                <h3 class="card-title">Account</h3>
+                <div class="settings-actions">
+                    <button class="btn btn--outline" id="logoutBtn" style="width: 100%;">
+                        <span>🚪 Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="card">
+                <h3 class="card-title">Data Management</h3>
+                <div class="settings-actions">
+                    <button class="btn btn--secondary" id="exportDataBtn">
+                        <span>📥 Export Data</span>
+                    </button>
+                    <button class="btn btn--secondary" id="importDataBtn">
+                        <span>📤 Import Data</span>
+                    </button>
+                    <button class="btn btn--outline" id="resetDataBtn">
+                        <span>🔄 Reset All Data</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Habit Modal -->
+    <div class="modal" id="addHabitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Habit</h3>
+                <button class="close-btn" data-modal="addHabitModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Habit Name</label>
+                    <input type="text" class="form-control" id="habitName" placeholder="e.g., Morning walk">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-control" id="habitCategory">
+                        <option value="Health & Fitness">Health &amp; Fitness</option>
+                        <option value="Mindfulness & Mental Health">Mindfulness &amp; Mental Health</option>
+                        <option value="Learning & Growth">Learning &amp; Growth</option>
+                        <option value="Productivity">Productivity</option>
+                        <option value="Social & Relationships">Social &amp; Relationships</option>
+                        <option value="Finance & Organization">Finance &amp; Organization</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Icon (Emoji)</label>
+                    <input type="text" class="form-control" id="habitIcon" placeholder="🎯" maxlength="2">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Habit Type</label>
+                    <select class="form-control" id="habitType">
+                        <option value="binary">Yes/No (Binary)</option>
+                        <option value="numeric">Count/Quantity (Numeric)</option>
+                        <option value="duration">Minutes (Duration)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="targetGroup">
+                    <label class="form-label">Target</label>
+                    <input type="number" class="form-control" id="habitTarget" value="1" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-modal="addHabitModal">Cancel</button>
+                <button class="btn btn--primary" id="saveHabitBtn">Add Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Login Modal -->
+    <div class="modal" id="mobileLoginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Mobile Number Login</h3>
+                <button class="close-btn" data-modal="mobileLoginModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" id="phoneNumberGroup">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter 10-digit number">
+                    <button class="btn btn--primary" id="sendOtpBtn" style="margin-top: 12px; width: 100%;" disabled>Send OTP</button>
+                </div>
+                <div class="form-group" id="otpGroup" style="display: none;">
+                    <label class="form-label">Enter OTP</label>
+                    <input type="text" class="form-control" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6">
+                    <button class="btn btn--primary" id="verifyOtpBtn" style="margin-top: 12px; width: 100%;">Verify OTP</button>
+                    <button class="btn btn--outline" id="changeNumberBtn" style="margin-top: 8px; width: 100%;">Change Number</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Login Modal -->
+    <div class="modal" id="emailLoginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Email Login</h3>
+                <button class="close-btn" data-modal="emailLoginModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="emailInput" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" id="passwordInput" placeholder="Enter password">
+                        <button class="password-toggle" id="togglePassword" type="button">👁️</button>
+                    </div>
+                </div>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+                <button class="btn btn--primary" id="emailLoginBtn2" style="margin-top: 16px; width: 100%;" disabled>Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Login Modal -->
+    <div class="modal" id="googleLoginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sign in with Google</h3>
+                <button class="close-btn" data-modal="googleLoginModal">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div class="google-icon" style="font-size: 48px; margin: 20px 0;">🔐</div>
+                <p style="margin-bottom: 20px; color: var(--color-text-secondary);">We'll redirect you to Google's secure login</p>
+                <button class="btn btn--primary" id="continueGoogleBtn" style="width: 100%;">Continue with Google</button>
+                <button class="btn btn--outline" data-modal="googleLoginModal" style="margin-top: 12px; width: 100%;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div class="modal" id="achievementModal">
+        <div class="modal-content achievement-modal">
+            <div class="achievement-celebration">
+                <div class="achievement-icon">🏆</div>
+                <h2 id="achievementTitle">Achievement Unlocked!</h2>
+                <p id="achievementMessage"></p>
+                <button class="btn btn--primary" data-modal="achievementModal">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="close-btn" id="closeNotifications">×</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be generated -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
